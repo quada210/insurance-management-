@@ -1,7 +1,7 @@
 // Change this line to use environment-based URL
 const API_BASE_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5000/api'   // Development
-  : 'https://your-backend-name.onrender.com/api';  // Production (update later)
+  : 'https://insurance-management-xbn2.onrender.com';  // Production (update later)
 
 async function apiRequest(endpoint, method = 'GET', body = null) {
   const options = {
