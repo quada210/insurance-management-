@@ -1,7 +1,8 @@
-// API Configuration
-const API_BASE_URL = 'http://localhost:5000/api';
+// Change this line to use environment-based URL
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api'   // Development
+  : 'https://your-backend-name.onrender.com/api';  // Production (update later)
 
-// Generic API Request Helper
 async function apiRequest(endpoint, method = 'GET', body = null) {
   const options = {
     method,
@@ -29,5 +30,4 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
   }
 }
 
-// Export for use in other files
 window.apiRequest = apiRequest;
