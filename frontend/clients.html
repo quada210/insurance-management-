@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clients - Insurance Management</title>
+  <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">Insurance 2026</div>
+    <ul class="navbar-nav">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="clients.html">Clients</a></li>
+      <li><a href="agents.html">Agents</a></li>
+      <li><a href="policies.html">Policies</a></li>
+      <li><a href="claims.html">Claims</a></li>
+      <li><a href="payouts.html">Payouts</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="flex" style="justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h1>Client Management</h1>
+      <button class="btn-neon" onclick="showAddClientForm()">+ Add Client</button>
+    </div>
+
+    <!-- Add/Edit Form -->
+    <div id="clientForm" class="glass-card mb-3" style="display: none;">
+      <h2 id="formTitle">Add New Client</h2>
+      <form id="clientFormElement" class="flex flex-column gap-2">
+        <input type="hidden" id="clientId">
+        <div class="flex gap-2">
+          <input type="text" id="firstName" class="glass-input" placeholder="First Name" required>
+          <input type="text" id="lastName" class="glass-input" placeholder="Last Name" required>
+        </div>
+        <div class="flex gap-2">
+          <input type="email" id="email" class="glass-input" placeholder="Email" required>
+          <input type="tel" id="phone" class="glass-input" placeholder="Phone" required>
+        </div>
+        <input type="date" id="dateOfBirth" class="glass-input" required>
+        <input type="text" id="addressLine1" class="glass-input" placeholder="Address Line 1" required>
+        <input type="text" id="addressLine2" class="glass-input" placeholder="Address Line 2">
+        <div class="flex gap-2">
+          <input type="text" id="city" class="glass-input" placeholder="City" required>
+          <input type="text" id="state" class="glass-input" placeholder="State" required>
+          <input type="text" id="zipCode" class="glass-input" placeholder="ZIP Code" required>
+        </div>
+        <div class="flex gap-2">
+          <button type="submit" class="btn-neon">Save Client</button>
+          <button type="button" class="btn-neon" onclick="hideClientForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Client List -->
+    <div class="glass-card">
+      <h2 class="mb-2">All Clients</h2>
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th>Date of Birth</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="clientTableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-api.js"></script>
+  <script src="js/clients.js"></script>
+</body>
+</html>

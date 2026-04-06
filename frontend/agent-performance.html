@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Performance - Insurance Management</title>
+  <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">Insurance 2026</div>
+    <ul class="navbar-nav">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="clients.html">Clients</a></li>
+      <li><a href="agents.html">Agents</a></li>
+      <li><a href="policies.html">Policies</a></li>
+      <li><a href="claims.html">Claims</a></li>
+      <li><a href="payouts.html">Payouts</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h1 class="mb-3">Agent Performance Leaderboard</h1>
+    
+    <div class="glass-card">
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Agent Name</th>
+            <th>Policies Sold</th>
+            <th>Total Premiums</th>
+            <th>Commission Earned</th>
+            <th>Avg Policy Value</th>
+          </tr>
+        </thead>
+        <tbody id="performanceTableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="js/supabase-api.js"></script>
+  <script>
+    async function loadPerformance() {
+      try {
+        const agents = await apiRequest('/agents');
+        const policies = await apiRequest('/policies');
+
+        const performance = agents.map(agent => {
+          const agentPolicies = policies.filter(p => p.agent_id === agent.agent_id);
+          const totalPremiums = agentPolicies.reduce((sum, p) => sum + parseFloat(p.premium_amount || 0), 0);
+          const commission = totalPremiums * (parseFloat(agent.commission_rate) / 100);
+          const avgPolicyValue = agentPolicies.length > 0 ? totalPremiums / agentPolicies.length : 0;
+
+          return {
+            name: `${agent.first_name} ${agent.last_name}`,
+            policiesSold: agentPolicies.length,
+            totalPremiums,
+            commission,
+            avgPolicyValue
+          };
+        });
+
+        // Sort by policies sold
+        performance.sort((a, b) => b.policiesSold - a.policiesSold);
+
+        const tbody = document.getElementById('performanceTableBody');
+        tbody.innerHTML = performance.map((p, index) => `
+          <tr>
+            <td><strong>${index + 1}</strong></td>
+            <td>${p.name}</td>
+            <td>${p.policiesSold}</td>
+            <td>$${p.totalPremiums.toLocaleString()}</td>
+            <td>$${p.commission.toLocaleString()}</td>
+            <td>$${p.avgPolicyValue.toLocaleString()}</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load performance data');
+      }
+    }
+
+    loadPerformance();
+  </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payouts - Insurance Management</title>
+  <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">Insurance 2026</div>
+    <ul class="navbar-nav">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="clients.html">Clients</a></li>
+      <li><a href="agents.html">Agents</a></li>
+      <li><a href="policies.html">Policies</a></li>
+      <li><a href="claims.html">Claims</a></li>
+      <li><a href="payouts.html">Payouts</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="flex" style="justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h1>Payout Management</h1>
+      <button class="btn-neon" onclick="showAddPayoutForm()">+ Add Payout</button>
+    </div>
+
+    <!-- Add/Edit Form -->
+    <div id="payoutForm" class="glass-card mb-3" style="display: none;">
+      <h2 id="formTitle">Add New Payout</h2>
+      <form id="payoutFormElement" class="flex flex-column gap-2">
+        <input type="hidden" id="payoutId">
+        
+        <select id="claimId" class="glass-input" required>
+          <option value="">Select Claim</option>
+        </select>
+        
+        <input type="number" step="0.01" id="payoutAmount" class="glass-input" placeholder="Payout Amount" required>
+        <input type="date" id="payoutDate" class="glass-input" placeholder="Payout Date" required>
+        
+        <select id="paymentMethod" class="glass-input">
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="check">Check</option>
+          <option value="cash">Cash</option>
+          <option value="wire_transfer">Wire Transfer</option>
+        </select>
+        
+        <input type="text" id="transactionReference" class="glass-input" placeholder="Transaction Reference">
+        
+        <select id="status" class="glass-input">
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="failed">Failed</option>
+        </select>
+        
+        <div class="flex gap-2">
+          <button type="submit" class="btn-neon">Save Payout</button>
+          <button type="button" class="btn-neon" onclick="hidePayoutForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Payouts List -->
+    <div class="glass-card">
+      <h2 class="mb-2">All Payouts</h2>
+      <div id="loadingSpinner" class="spinner" style="margin: 40px auto;"></div>
+      <div id="payoutTableContainer" style="display: none;">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th>Claim #</th>
+              <th>Client</th>
+              <th>Payout Amount</th>
+              <th>Payout Date</th>
+              <th>Payment Method</th>
+              <th>Reference</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="payoutTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/supabase-api.js"></script>
+  <script src="js/payouts.js"></script>
+  
+  <style>
+    .status-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+    .status-completed { background: rgba(57, 255, 20, 0.2); color: var(--neon-green); }
+    .status-failed { background: rgba(255, 0, 110, 0.2); color: var(--neon-pink); }
+  </style>
+</body>
+</html>
