@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Insurance Management</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+  <nav class="navbar">
+  <div class="navbar-brand">Insurance 2026</div>
+  <ul class="navbar-nav">
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="clients.html">Clients</a></li>
+    <li><a href="agents.html">Agents</a></li>  <!-- ADD THIS LINE -->
+    <li><a href="policies.html">Policies</a></li>
+    <li><a href="claims.html">Claims</a></li>
+    <li><a href="payouts.html">Payouts</a></li>
+  </ul>
+</nav>
+
+  <div class="container">
+    <h1 class="mb-3">Insurance Dashboard</h1>
+    
+    <div class="glass-card mb-3">
+      <h2 class="mb-2">Quick Stats</h2>
+      <div class="flex gap-3" style="flex-wrap: wrap;">
+        <div class="stat-box">
+          <h3 id="totalPolicies">-</h3>
+          <p>Total Policies</p>
+        </div>
+        <div class="stat-box">
+          <h3 id="activePolicies">-</h3>
+          <p>Active Policies</p>
+        </div>
+        <div class="stat-box">
+          <h3 id="totalClaims">-</h3>
+          <p>Total Claims</p>
+        </div>
+        <div class="stat-box">
+          <h3 id="totalPayouts">-</h3>
+          <p>Total Payouts</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <h2 class="mb-2">Recent Policies</h2>
+      <div id="loadingSpinner" class="spinner" style="margin: 40px auto;"></div>
+      <div id="errorMessage" style="display: none; color: var(--neon-pink); padding: 20px; text-align: center;"></div>
+      <div id="policyTable" style="display: none; overflow-x: auto;">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th>Policy #</th>
+              <th>Client</th>
+              <th>Agent</th>
+              <th>Type</th>
+              <th>Premium</th>
+              <th>Coverage</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="policyTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/supabase-api.js"></script>
+  <script>
+    // Dashboard loading logic
+    async function loadDashboard() {
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const errorMessage = document.getElementById('errorMessage');
+      const policyTable = document.getElementById('policyTable');
+
+      try {
+        console.log('Loading dashboard data...');
+        
+        // Try loading from policy_overview view first
+        let data;
+        try {
+          data = await apiRequest('/policies/overview');
+          console.log('Loaded from policy_overview view:', data);
+        } catch (viewError) {
+          console.warn('View not available, loading from policies:', viewError);
+          // Fallback to regular policies endpoint
+          data = await apiRequest('/policies');
+          console.log('Loaded from policies endpoint:', data);
+        }
+
+        if (!data || !Array.isArray(data)) {
+          throw new Error('Invalid data format received');
+        }
+
+        // Update stats
+        document.getElementById('totalPolicies').textContent = data.length;
+        
+        const activePolicies = data.filter(p => p.policy_status === 'active' || p.status === 'active').length;
+        document.getElementById('activePolicies').textContent = activePolicies;
+        
+        const totalClaims = data.reduce((sum, p) => sum + (parseInt(p.total_claims) || 0), 0);
+        document.getElementById('totalClaims').textContent = totalClaims;
+        
+        const totalPayouts = data.reduce((sum, p) => sum + parseFloat(p.total_payout_amount || 0), 0);
+        document.getElementById('totalPayouts').textContent = '$' + totalPayouts.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        // Populate table
+        const tbody = document.getElementById('policyTableBody');
+        
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No policies found. Add some policies to get started!</td></tr>';
+        } else {
+          tbody.innerHTML = data.slice(0, 10).map(policy => {
+            // Handle both view format and regular policy format
+            const policyNumber = policy.policy_number || 'N/A';
+            const clientName = policy.client_name || 
+                             (policy.client ? `${policy.client.first_name} ${policy.client.last_name}` : 'N/A');
+            const agentName = policy.agent_name || 
+                            (policy.agent ? `${policy.agent.first_name} ${policy.agent.last_name}` : 'N/A');
+            const policyType = policy.policy_type || 
+                             (policy.policy_type?.type_name) || 'N/A';
+            const premium = parseFloat(policy.premium_amount || 0);
+            const coverage = parseFloat(policy.coverage_amount || 0);
+            const status = policy.policy_status || policy.status || 'unknown';
+
+            return `
+              <tr>
+                <td>${policyNumber}</td>
+                <td>${clientName}</td>
+                <td>${agentName}</td>
+                <td>${policyType}</td>
+                <td>$${premium.toLocaleString()}</td>
+                <td>$${coverage.toLocaleString()}</td>
+                <td><span class="status-badge status-${status}">${status}</span></td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        loadingSpinner.style.display = 'none';
+        policyTable.style.display = 'block';
+        
+      } catch (error) {
+        console.error('Dashboard error:', error);
+        loadingSpinner.style.display = 'none';
+        errorMessage.textContent = 'Failed to load dashboard: ' + error.message;
+        errorMessage.style.display = 'block';
+        
+        // Set stats to 0
+        document.getElementById('totalPolicies').textContent = '0';
+        document.getElementById('activePolicies').textContent = '0';
+        document.getElementById('totalClaims').textContent = '0';
+        document.getElementById('totalPayouts').textContent = '$0';
+      }
+    }
+
+    // Load dashboard when page loads
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+
+  <style>
+    .stat-box {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .stat-box:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-5px);
+    }
+    
+    .stat-box h3 {
+      font-size: 36px;
+      color: var(--neon-blue);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    
+    .stat-box p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-active {
+      background: rgba(57, 255, 20, 0.2);
+      color: var(--neon-green);
+      border: 1px solid var(--neon-green);
+    }
+    
+    .status-expired {
+      background: rgba(255, 0, 110, 0.2);
+      color: var(--neon-pink);
+      border: 1px solid var(--neon-pink);
+    }
+    
+    .status-cancelled {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</body>
+</html>

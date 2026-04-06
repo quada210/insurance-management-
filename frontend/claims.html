@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claims - Insurance Management</title>
+  <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+  <nav class="navbar">
+  <div class="navbar-brand">Insurance 2026</div>
+  <ul class="navbar-nav">
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="clients.html">Clients</a></li>
+    <li><a href="agents.html">Agents</a></li>  <!-- ADD THIS LINE -->
+    <li><a href="policies.html">Policies</a></li>
+    <li><a href="claims.html">Claims</a></li>
+    <li><a href="payouts.html">Payouts</a></li>
+  </ul>
+</nav>
+
+  <div class="container">
+    <div class="flex" style="justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h1>Claims Management (NoSQL JSONB)</h1>
+      <button class="btn-neon" onclick="showAddClaimForm()">+ Add Claim</button>
+    </div>
+
+    <!-- Add/Edit Form -->
+    <div id="claimForm" class="glass-card mb-3" style="display: none;">
+      <h2 id="formTitle">Add New Claim</h2>
+      <form id="claimFormElement" class="flex flex-column gap-2">
+        <input type="hidden" id="claimId">
+        
+        <input type="text" id="claimNumber" class="glass-input" placeholder="Claim Number (e.g., CLM-2024-001)" required>
+        
+        <select id="policyId" class="glass-input" required>
+          <option value="">Select Policy</option>
+        </select>
+        
+        <div class="flex gap-2">
+          <input type="date" id="claimDate" class="glass-input" placeholder="Claim Date" required>
+          <input type="date" id="incidentDate" class="glass-input" placeholder="Incident Date" required>
+        </div>
+        
+        <input type="number" step="0.01" id="claimAmount" class="glass-input" placeholder="Claim Amount" required>
+        
+        <h3 style="margin-top: 16px; color: var(--neon-blue);">Incident Details (JSONB)</h3>
+        
+        <input type="text" id="incidentType" class="glass-input" placeholder="Incident Type (e.g., Vehicle Collision)">
+        <input type="text" id="incidentLocation" class="glass-input" placeholder="Location">
+        <textarea id="incidentDescription" class="glass-input" placeholder="Description" rows="3"></textarea>
+        <input type="text" id="additionalInfo" class="glass-input" placeholder="Additional Info (JSON format optional)">
+        
+        <select id="status" class="glass-input">
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="investigating">Investigating</option>
+        </select>
+        
+        <div class="flex gap-2">
+          <button type="submit" class="btn-neon">Save Claim</button>
+          <button type="button" class="btn-neon" onclick="hideClaimForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Claims List -->
+    <div class="glass-card">
+      <h2 class="mb-2">All Claims</h2>
+      <div id="loadingSpinner" class="spinner" style="margin: 40px auto;"></div>
+      <div id="claimTableContainer" style="display: none;">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th>Claim #</th>
+              <th>Policy</th>
+              <th>Client</th>
+              <th>Claim Date</th>
+              <th>Amount</th>
+              <th>Incident Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="claimTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/supabase-api.js"></script>
+  <script src="js/claims.js"></script>
+  
+  <style>
+    .status-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+    .status-approved { background: rgba(57, 255, 20, 0.2); color: var(--neon-green); }
+    .status-rejected { background: rgba(255, 0, 110, 0.2); color: var(--neon-pink); }
+    .status-investigating { background: rgba(0, 243, 255, 0.2); color: var(--neon-blue); }
+    
+    textarea.glass-input {
+      resize: vertical;
+      min-height: 60px;
+    }
+  </style>
+</body>
+</html>
